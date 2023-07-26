@@ -62,7 +62,7 @@ const Post = memo(({post, onCreate, onUpdate, onDelete}) => {
         e.preventDefault();
         // found that setTimeout triggers double render for some reason
         // without Math.random contenteditable elements do not rerender
-        setPostData({...postData, key: uuidv4()});
+        setPostData({...postData, contentEditableKey: uuidv4()});
         setIsEdited(false);
     }, [postData]);
 
@@ -90,7 +90,7 @@ const Post = memo(({post, onCreate, onUpdate, onDelete}) => {
                     due to issues with ref forwarding in functional components */}
                 <Typography
                     variant={"h4"} component={"h2"}
-                    key={postData.key + 'title'}
+                    key={postData.contentEditableKey + 'title'}
                     data-placeholder={"Post title goes here"}
                     onInput={() => setIsEdited(true)}
                     onPaste={pasteHandler}
@@ -106,7 +106,7 @@ const Post = memo(({post, onCreate, onUpdate, onDelete}) => {
                     sx={{'flex': '1'}}
                     variant={"body1"} component={"section"}
                     data-placeholder={"Post body where you type your awesome info to share"}
-                    key={postData.key + 'body'}
+                    key={postData.contentEditableKey + 'body'}
                     onInput={() => setIsEdited(true)}
                     onPaste={pasteHandler}
                     ref={bodyRef}
