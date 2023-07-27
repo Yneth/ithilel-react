@@ -85,6 +85,10 @@ const Post = memo(({post, onCreate, onUpdate, onDelete}) => {
                       'background': isEdited ? 'lightblue' : ''
                   }}>
 
+        <DeletePostModal isOpen={isDeleteModalOpen} onClose={deleteHandler}></DeletePostModal>
+
+        <ErrorAlert error={error} onClose={() => setError(null)}></ErrorAlert>
+
         <Grid container>
 
             <Grid item={true} xs sx={{'display': 'flex', 'flexDirection': 'column'}}>
@@ -133,10 +137,6 @@ const Post = memo(({post, onCreate, onUpdate, onDelete}) => {
 
             </Grid>
         </Grid>
-
-        <DeletePostModal isOpen={isDeleteModalOpen} onClose={deleteHandler}></DeletePostModal>
-
-        <ErrorAlert error={error} onClose={() => setError(null)}></ErrorAlert>
     </Paper>
 });
 
