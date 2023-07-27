@@ -1,10 +1,10 @@
 import {memo, useCallback, useEffect, useState} from 'react';
 import * as postsApi from "../api/posts";
 import Post from "./Post";
-import {CircularProgress, Stack} from "@mui/material";
+import {Button, CircularProgress, Stack} from "@mui/material";
 import ErrorAlert from "./ErrorAlert";
-import CreatePostButton from "./CreatePostButton";
 import { v4 as uuidv4 } from 'uuid';
+import AddIcon from "@mui/icons-material/Add";
 
 const PostList = memo(() => {
     const [isLoading, setLoading] = useState(true);
@@ -18,19 +18,15 @@ const PostList = memo(() => {
             .finally(() => setLoading(false));
     }, []);
 
-    const addPostHandler = () => {
+    const onAddPost = () => {
         setPosts(posts => [{key: `${uuidv4()}`}, ...posts]);
     };
 
-    const createPostHandler = useCallback((createdPost) => {
+    const onPostUpserted = useCallback((createdPost) => {
         setPosts(posts => posts.map(post =>  post.key === createdPost.key ? createdPost : post));
     }, []);
 
-    const updatePostHandler = useCallback((updatedPost) => {
-        setPosts(posts => posts.map(post =>  post.key === updatedPost.key ? updatedPost : post));
-    }, []);
-
-    const deletePostHandler = useCallback((deletedPostId, deletedPostKey, onError) => {
+    const onPostDeleted = useCallback((deletedPostId, deletedPostKey, onError) => {
         postsApi.remove(deletedPostId)
             .then(_ => setPosts(posts => posts.filter(post => deletedPostKey !== post.key)))
             .catch(error => [setError(error), onError()]);
@@ -39,15 +35,18 @@ const PostList = memo(() => {
     const postComponents = posts.map(post =>
         <Post key={post.key}
               post={post}
-              onCreate={createPostHandler}
-              onUpdate={updatePostHandler}
-              onDelete={deletePostHandler}>
+              onCreate={onPostUpserted}
+              onUpdate={onPostUpserted}
+              onDelete={onPostDeleted}>
         </Post>);
 
     return <>
         {isLoading
             ? <Stack alignItems="center"> <CircularProgress /></Stack>
-            : <><CreatePostButton onClick={addPostHandler}></CreatePostButton>{postComponents}</>}
+            : <>
+                <Button variant="outlined" fullWidth={true} color={'success'} onClick={onAddPost}><AddIcon/></Button>
+                {postComponents}
+            </>}
         <ErrorAlert error={error} onClose={() => setError(null)}></ErrorAlert>
     </>
 });

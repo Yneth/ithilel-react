@@ -19,29 +19,22 @@ const Post = memo(({post, onCreate, onUpdate, onDelete}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    const onDeleteModalClose = useCallback(({agreed}) => {
-        setIsDeleteModalOpen(false);
-        if (agreed) {
-            setIsLoading(true);
-            onDelete(postData.id, postData.key, () => setIsLoading(false));
-        } else {
-            setIsLoading(false);
-        }
-    }, [postData.id, postData.key, onDelete]);
-
-    const saveHandler = useCallback((e) => {
-        e.preventDefault();
-
-        setIsLoading(true);
-
-        const dataToUpdate = {...postData};
+    const getUpdatedPostData = (titleRef, bodyRef, postState) => {
+        const dataToUpdate = {...postState};
         if (titleRef.current) {
             dataToUpdate.title = titleRef.current.innerText;
         }
         if (bodyRef.current) {
             dataToUpdate.body = bodyRef.current.innerText;
         }
+        return dataToUpdate;
+    };
 
+    const upsertHandler = useCallback((e) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        const dataToUpdate = getUpdatedPostData(titleRef, bodyRef, postData);
         const isEmptyPost = dataToUpdate.body === '' && dataToUpdate.title === '';
         if (isEmptyPost) {
             setIsDeleteModalOpen(true);
@@ -57,6 +50,16 @@ const Post = memo(({post, onCreate, onUpdate, onDelete}) => {
                 .finally(() => setIsLoading(false));
         }
     }, [postData, titleRef, bodyRef, onCreate, onUpdate]);
+
+    const deleteHandler = useCallback(({agreed}) => {
+        setIsDeleteModalOpen(false);
+        if (agreed) {
+            setIsLoading(true);
+            onDelete(postData.id, postData.key, () => setIsLoading(false));
+        } else {
+            setIsLoading(false);
+        }
+    }, [postData.id, postData.key, onDelete]);
 
     const clearHandler = useCallback((e) => {
         e.preventDefault();
@@ -89,30 +92,28 @@ const Post = memo(({post, onCreate, onUpdate, onDelete}) => {
                 {/* did not find a way to create EditableTypography
                     due to issues with ref forwarding in functional components */}
                 <Typography
-                    variant={"h4"} component={"h2"}
                     key={postData.contentEditableKey + 'title'}
+                    variant={"h4"} component={"h2"}
                     data-placeholder={"Post title goes here"}
                     onInput={() => setIsEdited(true)}
                     onPaste={pasteHandler}
                     ref={titleRef}
                     spellCheck={false}
-                    contentEditable={true}
-                    suppressContentEditableWarning={true}>
+                    contentEditable suppressContentEditableWarning>
                     {/* data is not updated unless key is added to the component  */}
                     {postData.title}
                 </Typography>
 
                 <Typography
+                    key={postData.contentEditableKey + 'body'}
                     sx={{'flex': '1'}}
                     variant={"body1"} component={"section"}
                     data-placeholder={"Post body where you type your awesome info to share"}
-                    key={postData.contentEditableKey + 'body'}
                     onInput={() => setIsEdited(true)}
                     onPaste={pasteHandler}
                     ref={bodyRef}
                     spellCheck={false}
-                    contentEditable={true}
-                    suppressContentEditableWarning={true}>
+                    contentEditable suppressContentEditableWarning>
                     {/* data is not updated unless key is added to the component  */}
                     {postData.body}
                 </Typography>
@@ -127,13 +128,13 @@ const Post = memo(({post, onCreate, onUpdate, onDelete}) => {
 
                 {isEdited && !isLoading && <>
                     <Button fullWidth={true} color={'warning'} onClick={clearHandler}><ClearIcon/></Button>
-                    <Button fullWidth={true} color={'success'} onClick={saveHandler}><CheckIcon/></Button>
+                    <Button fullWidth={true} color={'success'} onClick={upsertHandler}><CheckIcon/></Button>
                 </>}
 
             </Grid>
         </Grid>
 
-        <DeletePostModal isOpen={isDeleteModalOpen} onClose={onDeleteModalClose}></DeletePostModal>
+        <DeletePostModal isOpen={isDeleteModalOpen} onClose={deleteHandler}></DeletePostModal>
 
         <ErrorAlert error={error} onClose={() => setError(null)}></ErrorAlert>
     </Paper>
