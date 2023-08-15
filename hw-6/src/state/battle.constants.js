@@ -1,0 +1,6 @@
+const BATTLE = {
+    SET_USER_INPUT: 'BATTLE.SET_USER_INPUT',
+    RESET_USER_INPUT: 'BATTLE.RESET_USER_INPUT',
+};
+
+export default BATTLE;

@@ -1,13 +1,13 @@
 import {Button, CircularProgress, Stack, Typography} from "@mui/material";
-import PlayerPreview from "./components/PlayerPreview";
+import PlayerPreview from "../layout/PlayerPreview";
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import * as api from "../api";
-import PlayerInfo from "./components/PlayerInfo";
-import {calculatePlayerScore, getPlayerUserNames, transformToObject} from "./actions";
-import PlayerContainer from "./components/PlayerContainer";
-import AppAlert from "../components/AppAlert";
-import CenteredBox from "../components/CenteredBox";
+import PlayerInfo from "./PlayerInfo";
+import {addScore, assignWinnersAndLosers, getPlayerUserNames, transformToObject} from "./actions";
+import PlayerContainer from "../layout/PlayerContainer";
+import AppAlert from "../layout/AppAlert";
+import CenteredBox from "../layout/CenteredBox";
 
 function hasError(playerData, key) {
     return playerData && playerData[key] && !!playerData[key].error;
@@ -18,25 +18,15 @@ const BattleResults = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const [playersData, setPlayersData] = useState(transformToObject(getPlayerUserNames(searchParams)));
 
+    // no reason to use redux here, we have query params as single source of truth
     useEffect(() => {
         const userNames = getPlayerUserNames(new URLSearchParams(window.location.search));
         setPlayersData(transformToObject(userNames, () => ({isLoading: true})));
 
-        // better join all requests into single Promise.all
-        // calculate score and assign winner at single place
-        // in result the user will have only two re-renders:
-        // first for inital compoent render
-        // second for results
-        // with shared error handling and loading state management
-        userNames.forEach((userName) => {
-            api.getUserRepositoriesAndProfile(userName)
-                .then(response => {
-                    setPlayersData(prevState => ({
-                        ...prevState,
-                        [userName]: {...response, ...calculatePlayerScore(response), isLoaded: true}
-                    }))
-                });
-        });
+        Promise.all(userNames.map(userName => api.getUserRepositoriesAndProfile(userName)))
+            .then(users => users.map(user => addScore(user)))
+            .then(users => assignWinnersAndLosers(users))
+            .then(users => setPlayersData(users.reduce((acc, user) => ({...acc, [user.userName]: user}), {})));
     }, []);
 
     return <Stack component={'section'} spacing={4} direction="column" justifyContent="center" sx={{flex: 1}}>
