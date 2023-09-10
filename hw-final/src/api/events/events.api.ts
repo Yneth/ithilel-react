@@ -16,6 +16,7 @@ class Events {
     return data;
   };
 
+
   public getAll = async (): Promise<EventListResponse> => {
     const { data } = await client.get<EventListResponse>(`${API_PREFIX}`);
     return data;

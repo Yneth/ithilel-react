@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AlertColor } from "@mui/material/Alert/Alert";
-import { RootState } from "./root.store";
+import type { RootState } from "./root.store";
 
 type NotificationId = number;
 

@@ -5,7 +5,7 @@ import {
   BetResponse,
   CreateBetRequest,
 } from "../../api/bets/bets.types";
-import { RootState } from "../root.store";
+import type { RootState } from "../root.store";
 
 type BetId = string;
 
