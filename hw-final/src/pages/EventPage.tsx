@@ -39,9 +39,7 @@ function EventPage() {
   const [isLoading, setIsLoading] = useState<boolean>(event.id === PRELOAD_ID);
 
   useEffect(() => {
-    if (event) {
-      setIsLoading(false);
-    }
+    if (event) setIsLoading(false);
   }, [event]);
   useEffect(() => {
     dispatch(eventActions.fetchEventRequest(eventId as string));
@@ -84,10 +82,10 @@ function EventPage() {
           <Typography variant="h4">Bets:</Typography>
           {bets && !!bets.length ? (
             <List>
-              {" "}
+              &nbsp;
               {bets.map((bet) => (
                 <BetListItem key={bet.id} betId={bet.id} />
-              ))}{" "}
+              ))}&nbsp;
             </List>
           ) : (
             <Typography variant="body2">No bets...</Typography>
